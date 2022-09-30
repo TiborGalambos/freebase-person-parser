@@ -25,7 +25,7 @@ def search(person_1_name, person_2_name):
 
             # TODO: Get the inital object id and get the rest of the lines with the same id.
             # TODO: Check the list of lines with same object if one of the names occurs, then get the birth date, ?death date?, city.
-            # TODO: always check if
+            # TODO: always check if the object is person
             # if current_object:
             #     print(line)
 
