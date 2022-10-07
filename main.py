@@ -10,6 +10,10 @@ auto_assign_person = True
 person_1_data = []
 person_2_data = []
 
+debug = False
+just_get_person_objects = True
+
+
 # --------------------------------------------------------------------- #
 
 
@@ -67,7 +71,7 @@ def get_death_date(temp_object_data):
     return death_date
 
 
-def check_temp_object(temp_object_data, person_1_name, person_2_name):
+def process_temp_object(temp_object_data, person_1_name, person_2_name):
     if is_person(temp_object_data):
 
         name = get_name(temp_object_data)
@@ -110,7 +114,7 @@ def search(person_1_name, person_2_name):
             fetched_object_id = re.search('^<http:\/\/rdf\.freebase\.com\/ns\/(.*?)>.*$', line).group(1)
 
             if fetched_object_id != prev_object_id:
-                if (check_temp_object(temp_object_data, person_1_name, person_2_name)):  # check prev object data
+                if (process_temp_object(temp_object_data, person_1_name, person_2_name)):  # check prev object data
                     could_they_meet()
                 temp_object_data.clear()
                 current_object_id = fetched_object_id  # new object
@@ -121,14 +125,76 @@ def search(person_1_name, person_2_name):
 
             prev_object_id = fetched_object_id
 
-        if (check_temp_object(temp_object_data, person_1_name, person_2_name)):  # check prev object data
+        if (process_temp_object(temp_object_data, person_1_name, person_2_name)):  # check prev object data
             could_they_meet()
         temp_object_data.clear()
 
+    fileobject.close()
+
+
+def process_temp_object_for_get_people_objects(temp_object_data):
+    if is_person(temp_object_data):
+        name = get_name(temp_object_data)
+        if name is not None:
+            birth_date = get_birth_date(temp_object_data)
+            death_date = get_death_date(temp_object_data)
+            if birth_date is not None and death_date is not None:
+                with open('C:/Users/tibor/Desktop/FREEBASE/people_person', 'a', encoding="utf-8") as fileobject:
+                    fileobject.write('\n'.join(temp_object_data))
+                fileobject.close()
+                return True
+    return False
+
+
+def get_people_objects():
+    temp_object_data = []
+
+    prev_object_id = ''
+    current_object_id = ''
+
+    line_counter = 0
+    object_counter = 0
+    person_counter = 0
+
+    with open(open_this_file, encoding="utf-8") as fileobject:
+        for line in fileobject:
+
+            if line_counter % 1000000 == 0:
+                print('line = ' + str(line_counter))
+
+            line_counter += 1
+
+            fetched_object_id = re.search('^<http:\/\/rdf\.freebase\.com\/ns\/(.*?)>.*$', line).group(1)
+
+            if debug: print(f'fetched: {fetched_object_id}, prev: {prev_object_id}')
+
+            if fetched_object_id != prev_object_id:
+                if process_temp_object_for_get_people_objects(temp_object_data):  # if it is person & is written to file
+                    person_counter += 1
+                    print('person = ' + str(person_counter))
+
+                temp_object_data.clear()
+                current_object_id = fetched_object_id  # new object
+                object_counter += 1
+
+                if object_counter % 100000 == 0:
+                    print('object = ' + str(object_counter))
+
+            if current_object_id == prev_object_id:  # adding data
+                temp_object_data.append(line)
+                current_object_id = fetched_object_id
+
+            prev_object_id = fetched_object_id
+
+        process_temp_object_for_get_people_objects(temp_object_data)
+    fileobject.close()
+
 
 if __name__ == '__main__':
-    person_1_name, person_2_name = get_persons()
 
-    print('searching names: {}, {} ...'.format(person_1_name, person_2_name))
-
-    search(person_1_name, person_2_name)
+    if not just_get_person_objects:
+        person_1_name, person_2_name = get_persons()
+        print('searching names: {}, {} ...'.format(person_1_name, person_2_name))
+        search(person_1_name, person_2_name)
+    else:
+        get_people_objects()
