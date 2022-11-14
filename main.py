@@ -1,10 +1,22 @@
-import json
+import os, os.path
+import time
 
+from whoosh import index
+from whoosh import writing
+from whoosh.fields import Schema, TEXT, KEYWORD, ID, STORED
+from whoosh.analysis import StemmingAnalyzer
+
+from whoosh.qparser import QueryParser, FuzzyTermPlugin
+
+
+
+import json
 from debug_tests import date_test
 import people_object_extracter
 from parsers import *
 from parsers import parse_dates
-from settings import open_this_file, auto_assign_person, just_extract_person_objects, person_1_data, person_2_data
+from settings import open_this_file, auto_assign_person, just_extract_person_objects, person_1_data, person_2_data, \
+    huge_file
 
 
 # --------------------------------------------------------------------- #
@@ -52,6 +64,7 @@ def could_they_meet():
         print('\nYES, they could have met')
     else:
         print('\nNO, they could not have met')
+
     exit(0)
 
 
@@ -64,7 +77,10 @@ def search(person_1_name, person_2_name):
     with open(open_this_file, encoding="utf-8") as fileobject:
         for line in fileobject:
 
-            fetched_object_id = re.search('^<http:\/\/rdf\.freebase\.com\/.+?\/(.*?)>.*$', line).group(1)
+            if line in ['\n', '\r\n']:
+                continue
+            else:
+                fetched_object_id = re.search('^<http:\/\/rdf\.freebase\.com\/.+?\/(.*?)>.*$', line).group(1)
 
             if fetched_object_id != prev_object_id:
                 if (process_temp_object(temp_object_data, person_1_name, person_2_name)):  # check prev object data
@@ -87,12 +103,65 @@ def search(person_1_name, person_2_name):
 
 if __name__ == '__main__':
 
-    if date_test():
-        could_they_meet()
+    timestart = datetime.now()
 
-    if not just_extract_person_objects:
-        person_1_name, person_2_name = get_persons()
-        print('searching names: {}, {} ...'.format(person_1_name, person_2_name))
-        search(person_1_name, person_2_name)
-    else:
-        people_object_extracter.get_people_objects()
+    schema = Schema(name=TEXT(stored=True), birthdate=TEXT(stored=True), deathdate=TEXT(stored=True))
+
+    if not os.path.exists("indexdir"):
+        os.mkdir("indexdir")
+        ix = index.create_in("indexdir", schema)
+        writer = ix.writer()
+        people_object_extracter.get_people_objects(writer)
+        print('ok \n\n')
+        writer.commit()
+
+    ix = index.open_dir("indexdir")
+    searcher = ix.searcher()
+
+    entry = input('search for:')
+
+
+    while entry != '':
+        parser = QueryParser("name", ix.schema)
+        parser.add_plugin(FuzzyTermPlugin)
+        query1 = parser.parse(entry)
+
+        # query2 = QueryParser("name", ix.schema).parse("Selena Gomez")
+        results = searcher.search(query1, terms=True, limit=1)
+        # results2 = searcher.search(query2, terms=True, limit=1)
+        # for r in results:
+        #     print(r)
+        #     print(r.get('name'))
+        #     print(r.get('birthdate'))
+        #     print(r.get('deathdate'))
+
+        for r in results:
+            print(r)
+            print(r.get('name'))
+            print('born:', r.get('birthdate'))
+            print('death:', r.get('deathdate'))
+        entry = input('search for:')
+
+
+    timeend = datetime.now()
+
+    print(timeend-timestart)
+
+    # writer.commit(mergetype=writing.CLEAR())
+
+
+
+    # if date_test():
+    #     could_they_meet()
+    #
+    # if not just_extract_person_objects:
+    #     person_1_name, person_2_name = get_persons()
+    #     print('searching names: {}, {} ...'.format(person_1_name, person_2_name))
+    #     search(person_1_name, person_2_name)
+    #
+    # else:
+    #     people_object_extracter.get_people_objects()
+    #
+    # print('\nnames not found')
+
+    exit(1)
