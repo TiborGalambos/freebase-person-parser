@@ -5,12 +5,14 @@ from datetime import datetime
 from settings import debug, INDEX_PATH
 
 
+# method for making sure that the index lookup found someone
 def check_if_found(result, entry):
     if result is None:
         print(entry, 'not found. Exiting program.')
         exit(1)
 
 
+# convert the string date of birth to datetime
 def birth_to_date(result_bd):
     try:
         person_birth = datetime.strptime(result_bd, '%Y-%m-%d')
@@ -27,6 +29,7 @@ def birth_to_date(result_bd):
     return person_birth
 
 
+# convert the string date of death to datetime
 def death_to_date(result_dd):
     if result_dd is not None:
         try:
@@ -46,10 +49,12 @@ def death_to_date(result_dd):
                     except:
                         pass
     else:
+        # if death is not available we assume that the person is alive
         person_death = datetime.today()
     return person_death
 
 
+# method for comparing two persons lifetime line
 def compare_dates(person_1_birth, person_1_death, person_2_birth, person_2_death):
     if debug:
         print('p1 bd: ', person_1_birth)
@@ -65,6 +70,7 @@ def compare_dates(person_1_birth, person_1_death, person_2_birth, person_2_death
         return False
 
 
+# compare the birthplaces of persons
 def compare_birthplace(result1_bp, result2_bp):
     if result1_bp != 'None' and result2_bp != 'None' and result1_bp == result2_bp:
         print('YES, they have the same birthplace')
@@ -74,16 +80,19 @@ def compare_birthplace(result1_bp, result2_bp):
         return False
 
 
+# compare the place the persons live(d)
 def compare_place_lived(result1_pl, result2_pl):
     if result1_pl != 'None' and result2_pl != 'None' and result1_pl == result2_pl:
         print('YES, they lived in same location')
         return True
     else:
-        print('No, I have no information about one or both persons place they lived')
+        print('NO, I have no information about one or both persons place they lived')
         return False
 
 
 if __name__ == '__main__':
+
+    # opening indexing directory
     ix = index.open_dir(INDEX_PATH)
     searcher = ix.searcher()
 
@@ -96,12 +105,15 @@ if __name__ == '__main__':
     result1_pl = None
     result2_pl = None
 
+    # user input of two names
     entry1 = input('search for first name:')
     entry2 = input('search for second name:')
 
     print('\n')
 
+    # we will get index by name
     parser = QueryParser("name", ix.schema)
+    # we allow some mistakes in names or lower/upper case
     parser.add_plugin(FuzzyTermPlugin)
 
     # first search
@@ -155,6 +167,7 @@ if __name__ == '__main__':
     person_2_birth = birth_to_date(result2_bd)
     person_2_death = death_to_date(result2_dd)
 
+    # calling comparing methods: date, birthplace, place lived
     compare_dates(person_1_birth, person_1_death, person_2_birth, person_2_death)
     compare_birthplace(result1_bp, result2_bp)
     compare_place_lived(result1_pl, result2_pl)

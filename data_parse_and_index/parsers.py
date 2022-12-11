@@ -2,6 +2,7 @@ import re
 
 from settings import debug
 
+# regex parsers for various parts of rows
 
 def is_person(temp_object_data):
 

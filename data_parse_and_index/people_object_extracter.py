@@ -4,6 +4,19 @@ from parsers import is_person, get_name, get_birth_date, get_death_date, get_pla
 from settings import debug
 
 
+# Iterating over all rows to get the required
+# overview of every person. Rows that are referring
+# the given person share the same ID in the
+# first column. Based on that, we know which
+# rows are referring to one and same person. If
+# we parse a new ID in the iteration, we process
+# the fetched rows from the previous parsing.
+# We are getting name and birthday in first place.
+# If these two information are not available, we
+# do not index this person. If they are available,
+# we also try to get death date, place where the
+# person was born and where he lived.
+
 def process_temp_object_for_get_people_objects(temp_object_data, writer):
     if is_person(temp_object_data):
         name = get_name(temp_object_data)
@@ -26,7 +39,6 @@ def process_temp_object_for_get_people_objects(temp_object_data, writer):
                 return True
     return False
 
-
 def get_people_objects(writer, dataframe):
     temp_object_data = []
 
@@ -35,6 +47,7 @@ def get_people_objects(writer, dataframe):
 
     person_counter = 0
     fetched_object_id = 0
+
 
     for index, row in tqdm(dataframe.iterrows(), total=dataframe.shape[0]):
         line = (row['object_id'], row['type'], row['context'])
