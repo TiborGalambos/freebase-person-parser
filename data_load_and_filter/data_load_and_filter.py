@@ -1,5 +1,6 @@
 import os.path
 import shutil
+
 import findspark
 from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StructField, StringType
@@ -16,7 +17,9 @@ def filter_dataframe(dataframe):
     rows_with_needed_data = dataframe.filter((dataframe.context == '<http://rdf.freebase.com/ns/people.person>') |
                                              (dataframe.type == '<http://rdf.freebase.com/ns/type.object.name>') |
                                              (dataframe.type == '<http://rdf.freebase.com/ns/people.person.date_of_birth>') |
-                                             (dataframe.type == '<http://rdf.freebase.com/ns/people.deceased_person.date_of_death>'))
+                                             (dataframe.type == '<http://rdf.freebase.com/ns/people.deceased_person.date_of_death>')|
+                                             (dataframe.type == '<http://rdf.freebase.com/ns/people.person.place_of_birth>') |
+                                             (dataframe.type == '<http://rdf.freebase.com/ns/people.person.places_lived>'))
 
     only_people = rows_with_needed_data \
         .join(people_ids, rows_with_needed_data.object_id == people_ids.object_id, 'leftsemi')

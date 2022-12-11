@@ -22,7 +22,11 @@ if __name__ == '__main__':
     parq_df = load_data_from_parquet()
     print("data loaded")
 
-    schema = Schema(name=TEXT(stored=True), birthdate=TEXT(stored=True), deathdate=TEXT(stored=True))
+    schema = Schema(name=TEXT(stored=True),
+                    birthdate=TEXT(stored=True),
+                    deathdate=TEXT(stored=True),
+                    birthplace=TEXT(stored=True),
+                    placelived=TEXT(stored=True))
 
     if os.path.exists(INDEX_PATH):
         print('removing old index files')

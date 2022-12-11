@@ -1,4 +1,5 @@
 import re
+
 from settings import debug
 
 
@@ -64,3 +65,33 @@ def get_death_date(temp_object_data):
         except:
             pass
     return death_date
+
+
+def get_place_of_birth(temp_object_data):
+    place_of_birth = None
+    for rows in temp_object_data:
+        if rows in ['\n', '\r\n']:
+            continue
+        try:
+            place_of_birth = re\
+                .search('^<http:\/\/rdf\.freebase\.com\/.+?\/.*?>\t<http:\/\/rdf.freebase.com\/ns\/people.person.place_of_birth>\t<http:\/\/rdf\.freebase\.com\/ns\/(.*?)>', rows)\
+                .group(1)
+            return place_of_birth
+        except:
+            pass
+    return place_of_birth
+
+
+def get_place_lived(temp_object_data):
+    place_lived = None
+    for rows in temp_object_data:
+        if rows in ['\n', '\r\n']:
+            continue
+        try:
+            place_lived = re\
+                .search('^<http:\/\/rdf\.freebase\.com\/.+?\/.*?>\t<http:\/\/rdf.freebase.com\/ns\/people.person.places_lived>\t<http:\/\/rdf\.freebase\.com\/ns\/(.*?)>', rows)\
+                .group(1)
+            return place_lived
+        except:
+            pass
+    return place_lived

@@ -1,23 +1,28 @@
 import re
 from tqdm import tqdm
-from parsers import is_person, get_name, get_birth_date, get_death_date
+from parsers import is_person, get_name, get_birth_date, get_death_date, get_place_of_birth, get_place_lived
 from settings import debug
 
 
 def process_temp_object_for_get_people_objects(temp_object_data, writer):
     if is_person(temp_object_data):
         name = get_name(temp_object_data)
-        if debug:
-            print(name)
+
         if name is not None:
             birth_date = get_birth_date(temp_object_data)
             if debug:
                 print(birth_date)
             if birth_date is not None:
-                writer\
+                if debug:
+                    print(name)
+                    print(str(get_place_of_birth(temp_object_data)))
+                    print(str(get_place_lived(temp_object_data)))
+                writer \
                     .add_document(name=str(name),
                                   birthdate=str(birth_date),
-                                  deathdate=str(get_death_date(temp_object_data)))
+                                  deathdate=str(get_death_date(temp_object_data)),
+                                  birthplace=str(get_place_of_birth(temp_object_data)),
+                                  placelived=str(get_place_lived(temp_object_data)))
                 return True
     return False
 
@@ -36,8 +41,8 @@ def get_people_objects(writer, dataframe):
         line = "\t".join(line)
 
         try:
-            fetched_object_id = re\
-                .search('^<http:\/\/rdf\.freebase\.com\/.+?\/(.*?)>.*$', line)\
+            fetched_object_id = re \
+                .search('^<http:\/\/rdf\.freebase\.com\/.+?\/(.*?)>.*$', line) \
                 .group(1)
         except:
             pass
