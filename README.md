@@ -1,14 +1,3 @@
-# Run with following commands in docker
-
-```
-python3 ./data_load_and_filter/data_load_and_filter.py
-hadoop fs -get /user/root/data /usr/src/data
-python3 ./data_parse_and_index/data_parse_and_index.py
-python3 ./data_search/data_search.py
-```
-
-For further explanations read the text below.
-
 # Could they meet? - Freebase person parser
 
 This is a school project for parsing information about people type objects from Freebase files. Those are naturally 
@@ -16,7 +5,7 @@ alive or dead people which has information about themselves in the Freebase data
 and let the user look up two names and find out whether they could meet based on three metrics: timeline they lived, 
 place of birth and palace they lived.
 
-### Freebase
+# Freebase data
 
 Freebase uses 3+1 columns in a row per information. 
 The RDF data is serialized using the N-Triples format and it is encoded as UTF-8 text.
@@ -44,23 +33,56 @@ people.person.places_lived
 ```
 ### Object
 The third row contains the object, or the context of the information. In this project we are looking for names, dates, 
-object types etc.
+object types etc. The last column is just a single dot.
 
 # Prerequisites
 
 It is necessary to download and install few things in order to run the code.\
+\
 Docker: https://www.docker.com/ \
 Docker image: https://hub.docker.com/r/iisas/hadoop-spark-pig-hive \
 Freebase dump: https://developers.google.com/freebase \
-Install Python requirements: `pip install -r requirements.txt`\
+Visual Studio Code: https://code.visualstudio.com/download \
 \
-After these steps, use Visual Studio Code to access the Docker container and copy the code and the 
-data dump to `/usr/src` directory in the docker.
+Some VS Code extensions that will be useful: \
+https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker \
+https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack \
+
+\
+After these steps use Visual Studio Code to access the Docker container and copy the code, 
+requirements.txt and the unzipped freebase data dump to a directory in the docker.
 
 Run the following scripts in docker:
 ```
-export PYTHONIOENCODING=utf8
+cd /your/directory
+sudo apt-get update ;
+sudo apt-get install python3-pip ;
+
+pip install --upgrade pip ;
+pip3 install -U setuptools_scm==3.0.5 ;
+
+python3 -m pip install --no-cache-dir -r requirements.txt ;
+
+export PYTHONIOENCODING=utf8 ;
+export SPARK_HOME=/usr/local/spark ;
+export PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.9.5-src.zip:$PYTHONPATH ;
+export PATH=$SPARK_HOME/bin:$SPARK_HOME/python:$PATH ;
+
+hadoop fs -copyFromLocal /usr/src/<freebase_data_dump_name>
 ```
+
+After these commands please restart your container and run the Python files according to commands below
+
+
+## Run with following commands in docker
+
+```
+python3 ./data_load_and_filter/data_load_and_filter.py ;
+hadoop fs -get /user/root/data /usr/src/data ;
+python3 ./data_parse_and_index/data_parse_and_index.py ;
+python3 ./data_search/data_search.py ;
+```
+
 
 # Code
 
@@ -106,7 +128,9 @@ python3 ./data_search/data_search.py
 ```
 
 
-### Example outputs
+# Example outputs
+
+The user writes the names to the console as shown below.
 
 ```
 search for first name:Dietrich Rusche
