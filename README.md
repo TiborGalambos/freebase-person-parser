@@ -138,8 +138,11 @@ python3 ./data_search/data_search.py
 
 
 # Example outputs
-
 The user writes the names to the console as shown below.
+The program works as far as the names are correctly written into the console. If there is a mistake in a name and
+the program cannot find the name, it will print a message that the name was not found. Lower and upper case will not
+make a difference in outputs.
+
 
 ```
 search for first name:Dietrich Rusche
@@ -190,3 +193,4 @@ NO, they could not have met by fetched time
 NO, I have no information about one or both persons birthplace
 NO, I have no information about one or both persons place they lived
 ```
+
