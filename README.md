@@ -50,11 +50,12 @@ https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remo
 
 \
 After these steps use Visual Studio Code to access the Docker container and copy the code, 
-requirements.txt and the unzipped freebase data dump to a directory in the docker.
+requirements.txt and the freebase data dump in zipped or unzipped format to `/usr/src` directory in the docker.
 
 Run the following scripts in docker:
 ```
-cd /your/directory
+cd /usr/src
+
 sudo apt-get update ;
 sudo apt-get install python3-pip ;
 
@@ -63,23 +64,31 @@ pip3 install -U setuptools_scm==3.0.5 ;
 
 python3 -m pip install --no-cache-dir -r requirements.txt ;
 
+hadoop fs -copyFromLocal /usr/src<freebase_data_dump_name>
+```
+After these commands please restart your container and open `/data_load_and_filter/settings.py` and set the right path 
+to the freebase data dump file and save the edited file. 
+
+Please run the following commands:
+```
 export PYTHONIOENCODING=utf8 ;
 export SPARK_HOME=/usr/local/spark ;
 export PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.9.5-src.zip:$PYTHONPATH ;
 export PATH=$SPARK_HOME/bin:$SPARK_HOME/python:$PATH ;
-
-hadoop fs -copyFromLocal /usr/src/<freebase_data_dump_name>
+PYSPARK_PYTHON=python3
 ```
 
-After these commands please restart your container and run the Python files according to commands below
+Now you can run the Python files using the commands below.
 
 
 ## Run with following commands in docker
 
 ```
-python3 ./data_load_and_filter/data_load_and_filter.py ;
+cd /usr/src
+
+spark-submit data_load_and_filter/data_load_and_filter.py ;
 hadoop fs -get /user/root/data /usr/src/data ;
-python3 ./data_parse_and_index/data_parse_and_index.py ;
+spark-submit data_parse_and_index/data_parse_and_index.py ;
 python3 ./data_search/data_search.py ;
 ```
 
@@ -94,7 +103,7 @@ directory, where these files will be copied from hadoop.
 
 To run the `data_load_and_filter` part use the following command:
 ```
-python3 ./data_load_and_filter/data_load_and_filter.py
+spark-submit data_load_and_filter/data_load_and_filter.py ;
 ```
 
 After running this part, it is necessary to run the following command to copy the parquet files into 
@@ -114,7 +123,7 @@ The data is then saved into index.
 
 To run the `data_parse_and_index` part use the following command:
 ```
-python3 ./data_parse_and_index/data_parse_and_index.py
+spark-submit data_parse_and_index/data_parse_and_index.py ;
 ```
 
 The `data_search` part loads the index from the filesystem and reads the users input from the console.
