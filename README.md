@@ -81,7 +81,7 @@ PYSPARK_PYTHON=python3
 Now you can run the Python files using the commands below.
 
 
-## Run with following commands in docker
+# Run with following commands in docker
 
 ```
 cd /usr/src
