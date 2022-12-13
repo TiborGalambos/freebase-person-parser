@@ -194,3 +194,12 @@ NO, I have no information about one or both persons birthplace
 NO, I have no information about one or both persons place they lived
 ```
 
+# Unit tests
+
+For the `data_search` we included some unit tests that can be executed with the commands below. It automatically 
+inserts the user inputs and checks whether the outputs of the searcher are correct.
+
+```
+cd /usr/src
+python3 /usr/src/data_search/tests/unit_tests.py
+```

@@ -1,15 +1,20 @@
 from whoosh import index
 from whoosh.qparser import QueryParser, FuzzyTermPlugin
-
+from io import StringIO
+import sys
 from datetime import datetime
-from settings import debug, INDEX_PATH
+
+INDEX_PATH = '/usr/src/indexdir'
+debug = False
 
 
 # method for making sure that the index lookup found someone
 def check_if_found(result, entry):
     if result is None:
         print(entry, 'not found. Exiting program.')
-        exit(1)
+        return False
+    else:
+        return True
 
 
 # convert the string date of birth to datetime
@@ -90,8 +95,7 @@ def compare_place_lived(result1_pl, result2_pl):
         return False
 
 
-if __name__ == '__main__':
-
+def run_search():
     # opening indexing directory
     ix = index.open_dir(INDEX_PATH)
     searcher = ix.searcher()
@@ -108,6 +112,9 @@ if __name__ == '__main__':
     # user input of two names
     entry1 = input('search for first name:')
     entry2 = input('search for second name:')
+
+    buffer = StringIO()
+    sys.stdout = buffer
 
     print('\n')
 
@@ -158,8 +165,8 @@ if __name__ == '__main__':
         result2_pl = r.get('placelived')
         print('place lived id:', result2_pl)
 
-    check_if_found(result1_name, entry1)
-    check_if_found(result2_name, entry2)
+    if not (check_if_found(result1_name, entry1) and check_if_found(result2_name, entry2)):
+        return buffer.getvalue()
 
     person_1_birth = birth_to_date(result1_bd)
     person_1_death = death_to_date(result1_dd)
@@ -171,5 +178,14 @@ if __name__ == '__main__':
     compare_dates(person_1_birth, person_1_death, person_2_birth, person_2_death)
     compare_birthplace(result1_bp, result2_bp)
     compare_place_lived(result1_pl, result2_pl)
+
+    return buffer.getvalue()
+
+
+if __name__ == '__main__':
+    output = run_search()
+
+    sys.stdout = sys.__stdout__
+    print(output)
 
     exit(0)
