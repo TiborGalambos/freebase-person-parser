@@ -75,7 +75,7 @@ export PYTHONIOENCODING=utf8 ;
 export SPARK_HOME=/usr/local/spark ;
 export PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.9.5-src.zip:$PYTHONPATH ;
 export PATH=$SPARK_HOME/bin:$SPARK_HOME/python:$PATH ;
-PYSPARK_PYTHON=python3
+export PYSPARK_PYTHON=/usr/bin/python3 ;
 ```
 
 Now you can run the Python files using the commands below.
